@@ -1,0 +1,1 @@
+{"version":3,"file":"word.interface.d.ts","sourceRoot":"","sources":["../../src/interfaces/word.interface.ts"],"names":[],"mappings":"AAAA,OAAO,KAAK,EAAQ,QAAQ,EAAE,UAAU,EAAiB,MAAM,8BAA8B,CAAA;AAC7F,MAAM,WAAW,OAAO;IACtB,IAAI,EAAE,MAAM,CAAC;IACb,UAAU,CAAC,EAAE,QAAQ,EAAE,CAAC;IACxB,WAAW,EAAE,UAAU,EAAE,CAAA;CAC1B"}
