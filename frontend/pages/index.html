@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Lexicon - Dictionary</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;700&family=Literata:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+
+  <!-- Your compiled Tailwind file -->
+  <link href="../css/output.css" rel="stylesheet">
+</head>
+
+<body class="min-h-screen bg-slate-50 font-['Literata'] text-slate-800 antialiased">
+
+  <a href="#results" class="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:rounded focus:bg-white focus:px-3 focus:py-2">
+    Skip to results
+  </a>
+
+  <!-- Header + search -->
+  <header class="border-b border-slate-200 bg-white">
+    <div class="mx-auto max-w-3xl px-5 pb-8 pt-10 sm:pt-14">
+      <p class="font-['Bricolage_Grotesque'] text-lg font-bold text-indigo-700">Lexicon</p>
+
+      <h1 class="mt-6 font-['Bricolage_Grotesque'] text-4xl font-bold leading-tight text-slate-900 sm:text-5xl">
+        Look up a word
+      </h1>
+      <p class="mt-3 max-w-prose text-slate-600">
+        Every term comes with its definitions and where each one was sourced.
+      </p>
+
+      <form id="search-form" class="mt-8 max-w-3xl" role="search" autocomplete="off">
+        <label for="search-input" class="sr-only">Search the dictionary</label>
+        <div class="flex items-center gap-3 rounded-xl border-2 border-slate-300 bg-white px-4 py-3 transition focus-within:border-indigo-600 focus-within:ring-4 focus-within:ring-indigo-100">
+          <svg class="h-5 w-5 shrink-0 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+            <circle cx="11" cy="11" r="7"></circle>
+            <path d="m20 20-3.5-3.5"></path>
+          </svg>
+          <input
+            id="search-input"
+            type="search"
+            placeholder="Search a word, e.g. function"
+            class="w-full bg-transparent text-lg text-slate-900 placeholder:text-slate-400 focus:outline-none"
+          >
+          <button
+            id="clear-btn"
+            type="button"
+            class="hidden rounded-md px-2 py-1 text-sm text-slate-500 hover:bg-slate-100 hover:text-slate-800 focus-visible:outline-2 focus-visible:outline-indigo-600"
+          >
+            Clear
+          </button>
+        </div>
+      </form>
+
+      <!-- Category filters (built from the data) -->
+      <div class="mt-5">
+        <p id="filter-label" class="mb-2 text-sm text-slate-500">Filter by category</p>
+        <div id="category-filters" class="flex flex-wrap gap-2" role="group" aria-labelledby="filter-label"></div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Results -->
+  <main id="results" class="mx-auto max-w-7xl px-5 py-10">
+    <p id="result-count" class="mb-6 text-sm text-slate-500" aria-live="polite"></p>
+
+    <!-- Loading -->
+    <div id="state-loading" class="space-y-8" aria-hidden="true">
+      <div class="animate-pulse space-y-3">
+        <div class="h-8 w-40 rounded bg-slate-200"></div>
+        <div class="h-4 w-full rounded bg-slate-200"></div>
+        <div class="h-4 w-4/5 rounded bg-slate-200"></div>
+      </div>
+      <div class="animate-pulse space-y-3">
+        <div class="h-8 w-32 rounded bg-slate-200"></div>
+        <div class="h-4 w-full rounded bg-slate-200"></div>
+      </div>
+    </div>
+
+    <!-- Empty -->
+    <div id="state-empty" class="hidden rounded-xl border border-dashed border-slate-300 bg-white p-8 text-center">
+      <p class="font-['Bricolage_Grotesque'] text-xl font-bold text-slate-900">No words found</p>
+      <p class="mt-2 text-slate-600">Check the spelling, or clear the search and category filter.</p>
+      <button id="reset-btn" type="button" class="mt-5 rounded-lg bg-indigo-700 px-4 py-2 text-white hover:bg-indigo-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-700">
+        Show all words
+      </button>
+    </div>
+
+    <!-- Error -->
+    <div id="state-error" class="hidden rounded-xl border border-red-200 bg-red-50 p-8 text-center" role="alert">
+      <p class="font-['Bricolage_Grotesque'] text-xl font-bold text-red-900">Couldn’t load the dictionary</p>
+      <p class="mt-2 text-red-800">The server didn’t respond. Check your connection and try again.</p>
+      <button id="retry-btn" type="button" class="mt-5 rounded-lg bg-red-700 px-4 py-2 text-white hover:bg-red-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-700">
+        Try again
+      </button>
+    </div>
+
+    <!-- Entries -->
+    <div id="entries" class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3"></div>
+  </main>
+
+  <footer class="border-t border-slate-200">
+    <div class="mx-auto max-w-3xl px-5 py-6 text-sm text-slate-500">
+      Definitions link to their original sources.
+    </div>
+  </footer>
+
+  <!-- Template: one dictionary entry (a card) -->
+  <template id="entry-template">
+    <article class="flex flex-col rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition hover:border-indigo-300 hover:shadow-md hover:-translate-y-1">
+      <h2 data-name class="font-['Bricolage_Grotesque'] text-3xl font-bold text-slate-900"></h2>
+      <ul data-categories class="mt-3 flex flex-wrap gap-2"></ul>
+      <ol data-definitions class="mt-5 list-decimal space-y-4 border-t border-slate-100 pl-5 pt-5 marker:font-semibold marker:text-indigo-700"></ol>
+    </article>
+  </template>
+
+  <!-- Template: one definition -->
+  <template id="definition-template">
+    <li class="pl-1 leading-relaxed">
+      <p data-text class="text-base"></p>
+      <a
+        data-source
+        target="_blank"
+        rel="noopener noreferrer"
+        class="mt-1 inline-block text-sm text-indigo-700 underline decoration-indigo-300 underline-offset-4 hover:decoration-indigo-700 focus-visible:outline-2 focus-visible:outline-indigo-700"
+      ></a>
+    </li>
+  </template>
+
+  <script src="../dist/script.js" type="module"></script>
+</body>
+</html>
